@@ -10,6 +10,7 @@
     >
       <section
         class="slide"
+        :data-timeline-decade="slide.decade"
         v-for="(slide, index) in slides" :key="index"
       >
         <div class="slide__container">
@@ -41,6 +42,18 @@
         </div>
       </section>
     </vue-tiny-slider>
+    <section class="decades">
+      <ul class="decades__list">
+        <li
+          @click="goToSlideByDecade(decade.year)"
+          v-for="decade in decades"
+          :key="decade.year"
+          :class="[
+            { 'active': theCurrentDecade === decade.year ? true : false }
+          ]"
+        >{{ decade.year }}s</li>
+      </ul>
+    </section>
   </div>
 </template>
 
@@ -52,8 +65,22 @@ export default {
   name: 'app',
   data: () => {
     return {
-      slides: slideData
+      slides: slideData,
+      currentDecade: null,
+      decades: [
+        { year: 1940 },
+        { year: 1950 },
+        { year: 1960 },
+        { year: 1970 },
+        { year: 1980 },
+        { year: 1990 },
+        { year: 2000 },
+        { year: 2010 }
+      ]
     }
+  },
+  mounted () {
+    this.currentDecade = parseInt(this.getCurrentSlideInfo().dataset['timelineDecade'])
   },
   components: {
     VueTinySlider
@@ -72,9 +99,28 @@ export default {
       if (event.direction === 16) {
         this.$refs.tinySlider.slider.goTo('prev')
       }
+
+      this.updateCurrentDecade()
+    },
+    getSlideByDecade (decade) {
+      const slideItems = Array.from(this.$refs.tinySlider.slider.getInfo().slideItems)
+      return slideItems.find(slide => parseInt(slide.dataset['timelineDecade']) === decade)
+    },
+    goToSlideByDecade (decade) {
+      let targetSlideIndex = this.getSlideByDecade(decade)['id'].split('item').pop()
+      this.$refs.tinySlider.slider.goTo(targetSlideIndex)
+      this.updateCurrentDecade()
+    },
+    updateCurrentDecade () {
+      const currentSlideInfo = this.getCurrentSlideInfo()
+      this.currentDecade = parseInt(currentSlideInfo.dataset['timelineDecade'])
     },
     imagePath (fileName) {
       return require('./assets/slides-media/' + fileName)
+    },
+    getCurrentSlideInfo () {
+      let slideItems = Array.from(this.$refs.tinySlider.slider.getInfo().slideItems)
+      return slideItems.filter(slide => slide.classList.contains('tns-slide-active'))[0]
     },
     surroundingYears (year) {
       let yearsBefore = []
@@ -92,280 +138,17 @@ export default {
     }
   },
   computed: {
+    theCurrentDecade () {
+      return this.currentDecade
+    }
   }
 }
 </script>
 
 <style lang="scss">
-
 @import 'scss/_variables.scss';
 @import 'scss/_mixins.scss';
 @import 'tiny-slider/src/tiny-slider.scss';
 @import 'sass-rem/_rem.scss';
-
-#timeline {
-  font-family: 'open-sans', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-
-  img {
-    max-width: 100%;
-  }
-}
-
-.tns-outer {
-  background-image: url('~@/assets/timeline-bg.jpg');
-  background-size: cover;
-  @include bp($medium) {
-    background-size: contain;
-  }
-}
-
-.tns-controls {
-  position: absolute;
-}
-
-.slide {
-  @include font-smoothing;
-  position: relative;
-  height: 100vh;
-  display: flex;
-  max-height: 780px;
-
-  @include bp($medium) {
-    height: auto;
-    height: 48.75vw;
-  }
-
-  &__container {
-    max-width: rem(1600px);
-    margin: 0 auto;
-    display: flex;
-  }
-}
-
-.governor {
-  display: flex;
-  justify-content: center;
-  flex-flow: column;
-
-  @include bp($small) {
-    flex-flow: row;
-  }
-
-  // layout
-  &__info {
-    padding: 0 rem(16px) rem(16px) rem(80px);
-
-    @include bp($small) {
-      text-align: right;
-      width: 40%;
-      padding: 0 1rem;
-    }
-
-    @include bp($medium) {
-      padding: 0 #{(62px /1600px) * 100%} 0 0;
-    }
-
-    @include bp($xlarge) {
-      width: rem(400px);
-      padding: 0 #{(62px /1600px) * 100%} 0 0;
-    }
-
-    @include bp($xlarge) {
-      width: #{(400px / 1600px) * 100%};
-      padding: 0 #{(62px /1600px) * 100%} 0 0;
-    }
-  }
-
-  &__other {
-    display: flex;
-    order: -1;
-
-    @include bp($small) {
-      order: 0;
-      width: 60%;
-    }
-
-    @include bp($medium) {
-      width: #{(930px / 1600px) * 100%};
-      order: 0;
-    }
-  }
-
-  // elements
-  &__bio {
-    font-size: rem(12px);
-
-    @include bp($large) {
-      font-size: rem(16px);
-    }
-  }
-
-  &__note {
-    font-size: rem(12px);
-  }
-
-  &__year {
-    display: block;
-    font-weight: 200;
-    color: $orange;
-    margin: 0;
-    font-size: rem(32px);
-
-    @include bp($small) {
-      margin-top: rem(16px);
-    }
-
-    @include bp($medium) {
-      margin-top: rem(48px);
-      font-size: rem(36px);
-    }
-
-    @include bp($large) {
-      font-size: rem(72px);
-    }
-
-    @include bp($xlarge) {
-      font-size: rem(120px);
-    }
-
-    @include bp($xxlarge) {
-      font-size: rem(150px);
-    }
-  }
-
-  &__years {
-    // width: #{(130px / 1600px) * 100%};
-    width: rem(60px);
-    border-left: 5px solid $purple;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    flex: 0 0 auto;
-
-    @include bp($small) {
-      width: rem(65px);
-      position: relative;
-    }
-
-    @include bp($large) {
-      width: rem(130px);
-      position: relative;
-    }
-
-    &__list {
-      cursor: ns-resize;
-      list-style: none;
-      padding: 2rem 0;
-      margin: 0;
-      display: flex;
-      flex-flow: column;
-      justify-content: space-between;
-      height: 100%;
-
-      @include bp($small) {
-        padding: 1rem 0;
-      }
-
-      @include bp($medium) {
-        padding: 1rem 0;
-      }
-
-      li {
-        color: #9E708B;
-        opacity: .29;
-        font-size: rem(18px);
-        font-weight: 100;
-        text-align: center;
-        display: block;
-
-        @include bp($large) {
-          font-size: rem(30px);
-        }
-
-        &:nth-child(4) {
-          font-weight: 700;
-          position: relative;
-          text-indent: -9999px;
-          opacity: 1;
-
-          &:before {
-            content: '';
-            width: 100%;
-            height: 5px;
-            background: $purple;
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-          }
-
-          &:after {
-            content: '';
-            width: 15px;
-            height: 15px;
-            background: $purple;
-            border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            right: 0;
-            transform: translateY(-50%);
-          }
-        }
-      }
-    }
-  }
-
-  &__name {
-    margin: 0;
-    color: #000;
-
-    @include bp($medium) {
-      font-size: rem(34px);
-    }
-  }
-
-  &__media {
-    padding: rem(16px) rem(24px) 0 rem(82px);
-
-    @include bp($small) {
-      padding: rem(16px) rem(24px) 0 rem(24px);
-    }
-
-    @include bp($large) {
-      padding-left: 2rem;
-    }
-
-    img {
-      max-height: rem(600px);
-    }
-  }
-
-  &__links {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-
-    a {
-      font-size: rem(12px);
-      color: $teal;
-      font-weight: 700;
-      display: block;
-      margin: 0 auto .5rem;
-
-      @include bp($large) {
-        font-size: rem(16px);
-      }
-    }
-  }
-}
+@import 'scss/etv-timeline.scss';
 </style>
