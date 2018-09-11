@@ -11,6 +11,7 @@
       <section
         class="slide"
         :data-timeline-decade="slide.decade"
+        :data-timeline-year="slide.year"
         v-for="(slide, index) in slides" :key="index"
       >
         <div class="slide__container">
@@ -49,7 +50,7 @@
           v-for="decade in decades"
           :key="decade.year"
           :class="[
-            { 'active': theCurrentDecade === decade.year ? true : false }
+            { 'active': theCurrentDecade === decade.year }
           ]"
         >{{ decade.year }}s</li>
       </ul>
@@ -86,28 +87,23 @@ export default {
     VueTinySlider
   },
   methods: {
-    getInfo (event) {
-      this.$refs.tinySlider.slider.getInfo()
-    },
     timelineMove (event) {
-      // if swipe up
+      // if swipe up (8) or swipe down (16)
       if (event.direction === 8) {
         this.$refs.tinySlider.slider.goTo('next')
-      }
-
-      // if swipe down
-      if (event.direction === 16) {
+      } else if (event.direction === 16) {
         this.$refs.tinySlider.slider.goTo('prev')
       }
-
       this.updateCurrentDecade()
     },
-    getSlideByDecade (decade) {
+    // gets id of first slide found by decade
+    getSlideIndexByDecade (decade) {
+      // convert from HTMLCollection to Array to run array methods
       const slideItems = Array.from(this.$refs.tinySlider.slider.getInfo().slideItems)
       return slideItems.find(slide => parseInt(slide.dataset['timelineDecade']) === decade)
     },
     goToSlideByDecade (decade) {
-      let targetSlideIndex = this.getSlideByDecade(decade)['id'].split('item').pop()
+      const targetSlideIndex = this.getSlideIndexByDecade(decade)['id'].split('item').pop()
       this.$refs.tinySlider.slider.goTo(targetSlideIndex)
       this.updateCurrentDecade()
     },
@@ -115,25 +111,29 @@ export default {
       const currentSlideInfo = this.getCurrentSlideInfo()
       this.currentDecade = parseInt(currentSlideInfo.dataset['timelineDecade'])
     },
+    // this goes through webpack's img optimizations
     imagePath (fileName) {
       return require('./assets/slides-media/' + fileName)
     },
     getCurrentSlideInfo () {
-      let slideItems = Array.from(this.$refs.tinySlider.slider.getInfo().slideItems)
+      const slideItems = Array.from(this.$refs.tinySlider.slider.getInfo().slideItems)
       return slideItems.filter(slide => slide.classList.contains('tns-slide-active'))[0]
     },
     surroundingYears (year) {
-      let yearsBefore = []
-      let yearsAfter = []
+      const yearsBefore = []
+      const yearsAfter = []
 
+      // get years before
       for (let i = 1; i <= 3; i++) {
         yearsBefore.push(year - i)
       }
 
+      // get years after
       for (let i = 1; i <= 4; i++) {
         yearsAfter.push(year + i)
       }
 
+      // combine and return
       return [...yearsBefore.reverse(), year, ...yearsAfter]
     }
   },

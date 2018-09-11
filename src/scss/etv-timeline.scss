@@ -35,10 +35,44 @@ body {
   height: 100vh;
   display: flex;
   max-height: 780px;
+  overflow: hidden;
 
   @include bp($medium) {
     height: auto;
     height: 48.75vw;
+  }
+
+  &:after {
+    content: attr(data-timeline-year);
+    display: block;
+    position: absolute;
+    opacity: .05;
+    top: 0;
+    right: 0;
+    transform: rotate(90deg);
+    transform-origin: bottom;
+    line-height: 1;
+    font-size: rem(42px);
+
+    @include bp($small) {
+      font-size: rem(180px);
+      right: -2.75rem;
+    }
+
+    @include bp($medium) {
+      font-size: rem(160px);
+      right: -2.5rem;
+    }
+
+    @include bp($large) {
+      font-size: rem(220px);
+      right: -3.5rem;
+    }
+
+    @include bp($xlarge) {
+      font-size: rem(350px);
+      right: -5rem;
+    }
   }
 
   &__container {
@@ -73,21 +107,23 @@ body {
     }
 
     @include bp($medium) {
-      padding: 0 #{(62px /1600px) * 100%} 0 0;
+      padding: 0 #{(62px /1600px) * 100%} 0 2rem;
     }
 
     @include bp($xlarge) {
       width: rem(400px);
-      padding: 0 #{(62px /1600px) * 100%} 0 0;
+      padding: 0 #{(62px /1600px) * 100%} 0 2rem;
     }
 
     @include bp($xlarge) {
-      width: #{(400px / 1600px) * 100%};
-      padding: 0 #{(62px /1600px) * 100%} 0 0;
+      // width: #{(400px / 1600px) * 100%};
+      padding: 0 #{(62px /1600px) * 100%} 0 2rem;
     }
   }
 
   &__other {
+    position: relative;
+    z-index: 1;
     display: flex;
     order: -1;
 
@@ -279,7 +315,7 @@ body {
   bottom: 0;
   width: 100%;
   overflow: hidden;
-  background: rgba(255, 255, 255, .35);
+  background: rgba(255, 255, 255, .7);
 
   &:before,
   &:after {
@@ -324,7 +360,7 @@ body {
       font-size: rem(14px);
 
       @include bp($medium) {
-        font-size: rem(24px);
+        font-size: rem(18px);
       }
 
       &.active {
