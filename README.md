@@ -1,5 +1,7 @@
 # etv_timeline
 
+Note: You need to have Vue CLI v3 installed globally (`npm i -g @vue/cli`)
+
 ## Project setup
 ```
 npm install

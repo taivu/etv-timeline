@@ -1,33 +1,28 @@
+$rem-baseline: 12px;
+
 #timeline {
-  font-family: 'open-sans', Helvetica, Arial, sans-serif;
+  font-family: 'Open Sans', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   position: relative;
-}
+  overflow: hidden;
 
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
+  * {
+    box-sizing: border-box;
+  }
 
   img {
     max-width: 100%;
   }
 }
 
-.tns-outer {
-  background-image: url('~@/assets/timeline-bg.jpg');
-  background-size: cover;
-  @include bp($medium) {
-    background-size: contain;
-  }
-}
-
-.tns-controls {
-  position: absolute;
-}
+// .tns-outer {
+//   background-image: url('~@/assets/timeline-bg.jpg');
+//   background-size: cover;
+//   @include bp($medium) {
+//     background-size: contain;
+//   }
+// }
 
 .slide {
   @include font-smoothing;
@@ -99,7 +94,7 @@ body {
 
     @include bp($small) {
       text-align: right;
-      width: 40%;
+      width: 70%;
       padding: 0 1rem;
       display: flex;
       flex-flow: column;
@@ -108,6 +103,7 @@ body {
 
     @include bp($medium) {
       padding: 0 #{(62px /1600px) * 100%} 0 2rem;
+      width: 40%;
     }
 
     @include bp($xlarge) {
@@ -122,7 +118,7 @@ body {
   }
 
   &__other {
-    position: relative;
+    // position: relative;
     z-index: 1;
     display: flex;
     order: -1;
@@ -140,7 +136,13 @@ body {
 
   // elements
   &__bio {
+    margin: 1rem 0;
     font-size: rem(12px);
+    line-height: 1.4;
+
+    @include bp($medium) {
+      margin: 2rem 0 1rem;
+    }
 
     @include bp($large) {
       font-size: rem(16px);
@@ -155,8 +157,9 @@ body {
     display: block;
     font-weight: 200;
     color: $orange;
-    margin: 0;
+    margin: 0 0 .5rem;
     font-size: rem(32px);
+    line-height: 1;
 
     @include bp($small) {
       // margin-top: rem(16px);
@@ -189,6 +192,33 @@ body {
     bottom: 0;
     flex: 0 0 auto;
 
+    .timeline--pristine & {
+      &:before {
+        content: '';
+      }
+    }
+    
+    &:before {
+      content: none;
+      display: block;
+      position: absolute;
+      height: rem(150px);
+      width: rem(60px);
+      background-image: url('~@/assets/swipe.png');
+      background-size: 100%;
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-size: contain;
+      z-index: 1;
+      top: 10%;
+      left: 0;
+      animation: bounce 3s infinite;
+
+      @include bp($large) {
+        left: 15%;
+      }
+    }
+
     @include bp($small) {
       width: rem(65px);
       position: relative;
@@ -200,9 +230,10 @@ body {
     }
 
     &__list {
+      // animation: bounce 4s infinite;
       cursor: ns-resize;
       list-style: none;
-      padding: 1rem 0 3rem;
+      padding: rem(60px) 0 rem(78px);
       margin: 0;
       display: flex;
       flex-flow: column;
@@ -210,11 +241,11 @@ body {
       height: 100%;
 
       @include bp($small) {
-        padding: 1rem 0 2.5rem;
+        padding: rem(48px) 0 rem(72px);
       }
 
       @include bp($medium) {
-        padding: 1rem 0 3.5rem;
+        padding: rem(48px) 0 rem(72px);
       }
 
       li {
@@ -265,6 +296,9 @@ body {
   &__name {
     margin: 0;
     color: #000;
+    font-weight: 700;
+    line-height: 1.2;
+    font-size: rem(24px);
 
     @include bp($medium) {
       font-size: rem(34px);
@@ -275,7 +309,8 @@ body {
     padding: rem(16px) rem(24px) 0 rem(82px);
 
     @include bp($small) {
-      padding: rem(16px) rem(24px) 0 rem(24px);
+      // padding: rem(16px) rem(24px) 0 rem(0px);
+      padding: 0;
       display: flex;
       flex-flow: column;
       justify-content: center;
@@ -294,17 +329,37 @@ body {
     list-style: none;
     padding: 0;
     margin: 0;
+  }
 
-    a {
-      font-size: rem(12px);
-      color: $teal;
-      font-weight: 700;
-      display: block;
-      margin: 0 auto .5rem;
+  &__link {
+    font-size: rem(12px);
+    color: $teal;
+    font-weight: 700;
+    display: block;
+    margin: 0 auto .5rem;
+    cursor: pointer;
+    text-decoration: underline;
 
-      @include bp($large) {
-        font-size: rem(16px);
-      }
+    &:hover {
+      text-decoration: none;
+    }
+
+    @include bp($large) {
+      font-size: rem(16px);
+    }
+  }
+
+  &__note {
+    font-size: rem(10px);
+  }
+
+  &__inauguration-date {
+    margin: 0;
+    font-style: italic;
+    font-size: rem(12px);
+
+    @include bp($medium) {
+      font-size: rem(16px);
     }
   }
 }
@@ -367,5 +422,37 @@ body {
         color: $orange;
       }
     }
+  }
+}
+
+.timeline-arrow {
+  background-image: url('~@/assets/arrow-up.svg');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: contain;
+  width: rem(#{26px / 2});
+  height: rem(#{26px / 2});
+  position: absolute;
+  left: rem(10px);
+  display: block;
+  text-indent: -9999px;
+  cursor: pointer;
+
+  @include bp($medium) {
+    width: rem(38px);
+    height: rem(26px);
+  }
+
+  @include bp($large) {
+    left: 28%;
+  }
+
+  &--prev {
+    top: rem(16px);
+  }
+
+  &--next {
+    bottom: rem(42px);
+    transform: rotate(180deg);
   }
 }

@@ -1,5 +1,10 @@
 <template>
-  <div id="timeline">
+  <div
+    id="timeline"
+    :class="[{
+      'timeline--pristine': isTimelinePristine
+    }]"
+  >
     <vue-tiny-slider
       ref="tinySlider"
       :loop="false"
@@ -19,10 +24,16 @@
             <div class="governor__info">
               <h2 class="governor__year">{{ slide.year }}</h2>
               <h3 class="governor__name">{{ slide.governor.name }}</h3>
+              <p class="governor__inauguration-date">Inaugration: {{ slide.inaugurationDate }}</p>
               <p class="governor__bio">{{ slide.governor.bio }}</p>
               <ul class="governor__links">
                 <li v-for="(link, index) in slide.links" :key="link.url + index">
-                  <a :href="link.url">{{ link.text }}</a>
+                  <a v-if="link.type !== 'video'" :href="link.url" target="_blank" rel="external" class="governor__link">
+                    {{ link.text }}
+                  </a>
+                  <p v-else class="governor__link" @click="popup(link.url)">
+                    {{ link.text }}
+                  </p>
                 </li>
               </ul>
               <p v-if="slide.note" class="governor__note">
@@ -30,13 +41,15 @@
               </p>
             </div>
             <div class="governor__other">
-              <div class="governor__years">
-                <ul class="governor__years__list" v-hammer:swipe="timelineMove">
+              <div class="governor__years" v-hammer:swipe="timelineMove">
+                <span class="timeline-arrow timeline-arrow--prev" @click="timelineArrow('prev')">Previous Timeline</span>
+                <span class="timeline-arrow timeline-arrow--next" @click="timelineArrow('next')">Previous Timeline</span>
+                <ul class="governor__years__list">
                   <li v-for="(year, index) in surroundingYears(slide.year)" :key="slide.governor.name.split(' ')[0] + index">{{ year }}</li>
                 </ul>
               </div>
               <div class="governor__media">
-                <img :src="imagePath(slide.governor.image)">
+                <img :src="imagePath(slide.governor.image)" :alt="slide.inaugurationYear">
               </div>
             </div>
           </article>
@@ -55,19 +68,22 @@
         >{{ decade.year }}s</li>
       </ul>
     </section>
+    <modals-container />
   </div>
 </template>
 
 <script>
 import VueTinySlider from 'vue-tiny-slider'
 import slideData from './assets/slideData.js'
+import YoutubeModal from './components/YoutubeModal.vue'
 
 export default {
-  name: 'app',
+  name: 'timeline',
   data: () => {
     return {
       slides: slideData,
       currentDecade: null,
+      isPristine: true,
       decades: [
         { year: 1940 },
         { year: 1950 },
@@ -81,7 +97,9 @@ export default {
     }
   },
   mounted () {
-    this.currentDecade = parseInt(this.getCurrentSlideInfo().dataset['timelineDecade'])
+    this.$nextTick(function () {
+      this.currentDecade = parseInt(this.getCurrentSlideInfo().dataset['timelineDecade'])
+    })
   },
   components: {
     VueTinySlider
@@ -91,10 +109,20 @@ export default {
       // if swipe up (8) or swipe down (16)
       if (event.direction === 8) {
         this.$refs.tinySlider.slider.goTo('next')
+        if (this.isPristine) {
+          this.isPristine = false
+        }
       } else if (event.direction === 16) {
         this.$refs.tinySlider.slider.goTo('prev')
       }
       this.updateCurrentDecade()
+    },
+    timelineArrow (direction) {
+      if (direction === 'next') {
+        this.timelineMove({ direction: 8 })
+      } else if (direction === 'prev') {
+        this.timelineMove({ direction: 16 })
+      }
     },
     // gets id of first slide found by decade
     getSlideIndexByDecade (decade) {
@@ -135,20 +163,52 @@ export default {
 
       // combine and return
       return [...yearsBefore.reverse(), year, ...yearsAfter]
+    },
+    getYoutubeVideoId (url) {
+      const id = url.split('&')[0].slice(-11)
+      return id
+    },
+    popup (url) {
+      const youtubeId = this.getYoutubeVideoId(url)
+      this.$modal.show(YoutubeModal,
+        { youtubeId },
+        {
+          adaptive: true
+        })
     }
   },
   computed: {
     theCurrentDecade () {
       return this.currentDecade
+    },
+    isTimelinePristine () {
+      return this.isPristine
     }
   }
 }
 </script>
 
 <style lang="scss">
-@import 'scss/_variables.scss';
-@import 'scss/_mixins.scss';
+@keyframes bounce {
+  from { transform: translateY(0) }
+  50% { transform: translateY(0) }
+  85% { transform: translateY(1rem) }
+  90% { transform: translateY(-1rem) }
+  100% { transform: translateY(0rem) }
+}
+</style>
+
+<style lang="scss" scoped>
 @import 'tiny-slider/src/tiny-slider.scss';
-@import 'sass-rem/_rem.scss';
 @import 'scss/etv-timeline.scss';
+</style>
+
+<style lang="scss">
+.tns-outer {
+  background-image: url('~@/assets/timeline-bg.jpg');
+  background-size: cover;
+  @include bp($medium) {
+    background-size: contain;
+  }
+}
 </style>
